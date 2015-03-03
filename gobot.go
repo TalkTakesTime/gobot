@@ -3,7 +3,6 @@
 package main
 
 import (
-	"fmt"
 	"golang.org/x/net/websocket"
 	"log"
 	"math/rand"
@@ -57,7 +56,7 @@ func (bot *Bot) Receive() {
 		if err := websocket.Message.Receive(bot.ws, &msg); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Received: %s.\n", msg)
+		log.Printf("\nReceived: %s.\n", msg)
 		bot.inQueue <- msg
 	}
 }
@@ -75,7 +74,7 @@ func (bot *Bot) Start() {
 	rand.Seed(time.Now().UnixNano())
 
 	connectionUrl := GenerateConStr()
-	fmt.Printf("Connecting to %s\n\n", connectionUrl)
+	log.Printf("\nConnecting to %s\n\n", connectionUrl)
 	var err error
 	bot.ws, err = websocket.Dial(connectionUrl, "", "https://play.pokemonshowdown.com")
 	if err != nil {
@@ -88,7 +87,7 @@ func (bot *Bot) Start() {
 	for {
 		select {
 		case msg := <-bot.inQueue:
-			fmt.Printf("Unqueued: %s.\n", msg)
+			log.Printf("\nUnqueued: %s.\n", msg)
 			// TODO: add message handling
 		default:
 			// do nothing

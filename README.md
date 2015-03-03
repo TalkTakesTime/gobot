@@ -1,4 +1,4 @@
-Pokemon Showdown! GoBot
+Pokémon Showdown! GoBot
 =======================
 
 Another [Pokémon Showdown!][1] bot, this time in Go. Written by TalkTakesTime
@@ -10,7 +10,7 @@ WARNING
 -------
 
 This bot is still very much in development, and will be in its alpha stages
-for possible a long time. Don't expect fast progress.
+for possibly a long time. Don't expect fast progress.
 
 Installation
 ------------
@@ -24,8 +24,8 @@ It requires the following packages to run:
  - `strconv` (for int -> string conversion)
  - `math/rand` (for generating the websocket URL)
  - `time` (for random seeds)
- - `fmt` (for other logging?)
-Note that the latter three will probably be removed in later updates.
+
+Note that the latter two will probably be removed in later updates.
 
 I will assume that you know how to clone a Git repository or otherwise obtain
 the source code. To install the dependencies, navigate to the directory
