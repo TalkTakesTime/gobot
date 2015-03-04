@@ -22,21 +22,22 @@ It requires the following packages to run:
  - `log` (for logging, surprisingly)
  - `golang.org/x/net/websocket` (for websockets)
  - `strconv` (for int -> string conversion)
- - `math/rand` (for generating the websocket URL)
- - `time` (for random seeds)
-
-Note that the latter two will probably be removed in later updates.
+ - `io/ioutil` (for reading the config file)
+ - `gopkg.in/yaml.v2` (for parsing the YAML in the config file)
 
 I will assume that you know how to clone a Git repository or otherwise obtain
-the source code. To install the dependencies, navigate to the directory
-you downloaded this repository to, and run
+the source code (hint: `go get github.com/TalkTakesTime/gobot` works). To
+install the dependencies, navigate to the directory you downloaded this
+repository to, and run
 
-    go get ./...
+    go get .
+    go build
 
 To build and start the bot, run
 
+    cd main
     go build
-    ./GoBot
+    ./main
 
 From there, you're on your own!
 

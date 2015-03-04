@@ -1,5 +1,9 @@
 *~
 GoBot
+debug/
+debug/*
+main/config.yaml
+main/main
 
 .hg
 .svn
