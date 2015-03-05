@@ -12,9 +12,6 @@ WARNING
 This bot is still very much in development, and will be in its alpha stages
 for possibly a long time. Don't expect fast progress.
 
-IMPORTANT: login without a password is currently unsupported. It will be fixed
-as soon as possible.
-
 Installation
 ------------
 

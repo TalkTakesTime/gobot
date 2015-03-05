@@ -50,7 +50,7 @@ func (bot *Bot) Receive() {
 		err := websocket.Message.Receive(bot.ws, &msg)
 		checkError(err)
 
-		//log.Printf("\nReceived: %s.\n", msg)
+		log.Printf("\nReceived: %s.\n", msg)
 		bot.inQueue <- msg
 	}
 }

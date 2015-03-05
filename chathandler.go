@@ -59,17 +59,26 @@ func (bot *Bot) ParseRawMessage(rawMsg string) []Message {
 
 // Log in to PS! under the given name and password. See PS! documentation
 // if you want to understand exactly what is required for login.
-// NOTE: LOGGING IN WITHOUT A PASSWORD DOES NOT WORK CURRENTLY
 func (bot *Bot) LogIn(challstr Message) {
 	var res *http.Response
 	var err error
 
+	// NOTE: This part does not match the PS! documentation.
+	//
+	// PS! documentation does not adequately describe the necessary process
+	// for logging in without a password; instead of using a POST request,
+	// a GET request should be used instead with the following fields:
+	//   - act: getassertion
+	//   - userid: the id version of the nick in config (use toId to get it)
+	//   - challengekeyid: the first part of |challstr| (a single digit)
+	//   - challenge: the second part of |challstr| (a string of characters)
+	// See the below documentation for the difference in the HTTP response.
 	if bot.config.Pass == "" {
-		// TODO: fix this
 		userId := toId(bot.config.Nick)
-		res, err = http.Get(LoginUrl + "?act=getassertion&userid=" +
-			userId + "&challengekeyid=" + challstr.args[0] + "&challenge=" +
-			challstr.args[1])
+		res, err = http.Get(LoginUrl +
+			"?act=getassertion&userid=" + userId +
+			"&challengekeyid=" + challstr.args[0] +
+			"&challenge=" + challstr.args[1])
 	} else {
 		res, err = http.PostForm(LoginUrl, url.Values{
 			"act":            {"login"},
@@ -85,14 +94,27 @@ func (bot *Bot) LogIn(challstr Message) {
 	body, err := ioutil.ReadAll(res.Body)
 	checkError(err)
 
-	type LoginDetails struct {
-		Assertion string
-	}
-	data := LoginDetails{}
-	err = json.Unmarshal(body[1:], &data)
-	checkError(err)
+	// NOTE: This part does not match the PS! documentation.
+	//
+	// According to PS! documentation, the HTTP response should be a string
+	// beginning with "]", followed by a JSON object, which contains a field
+	// called `assertion`, which contains the message needed to complete login
+	// using /trn. However, when logging in without a password, the HTTP
+	// response is actually only the data that would normally be contained
+	// in the `assertion` field. Because of this, the body of the HTTP response
+	// can be used directly in /trn without needing to parse it as JSON.
+	if bot.config.Pass == "" {
+		bot.outQueue <- "|/trn " + bot.config.Nick + ",0," + string(body)
+	} else {
+		type LoginDetails struct {
+			Assertion string
+		}
+		data := LoginDetails{}
+		err = json.Unmarshal(body[1:], &data)
+		checkError(err)
 
-	bot.outQueue <- "|/trn " + bot.config.Nick + ",0," + data.Assertion
+		bot.outQueue <- "|/trn " + bot.config.Nick + ",0," + data.Assertion
+	}
 }
 
 // Determines the type of the message and its contents from its raw data.

@@ -16,7 +16,6 @@ nick: example
 #
 # The password associated with the given nick. Leave as ""
 # if the nick is unregistered.
-# NOTE: LOGGING IN WITHOUT A PASSWORD DOES NOT WORK CURRENTLY
 pass: ""
 #
 # The server to connect to. Note that this is not necessarily
