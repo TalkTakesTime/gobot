@@ -1,3 +1,12 @@
+/*
+ * Configuration management for the bot.
+ *
+ * The default config can be found in main/config-example.yaml and should
+ * be copied into main/config.yaml, then edited to meet requirements.
+ *
+ * Copyright 2015 (c) Ben Frengley (TalkTakesTime)
+ */
+
 package gobot
 
 import (
@@ -27,27 +36,21 @@ func GetConfig() Config {
 	contents, err := ioutil.ReadFile("./config.yaml")
 	if err != nil {
 		// no config file, so we'll create a new one
-		log.Println("No config file found, trying to use config-example instead...")
+		log.Println("No config file found, trying to use config-example" +
+			" instead...")
 		// read from the example config
 		contents, err = ioutil.ReadFile("./config-example.yaml")
-		if err != nil {
-			log.Fatal(err)
-		}
+		checkError(err)
+
 		// and write it to the new config file
 		err = ioutil.WriteFile("./config.yaml", contents, 0644)
-		if err != nil {
-			log.Fatal(err)
-		}
+		checkError(err)
 	}
 
 	// and convert the YAML to a Config object
 	var config Config
 	err = yaml.Unmarshal(contents, &config)
-	if err != nil {
-		// someone probably messed with config-example.yaml
-		// replace it with a correct one from the repo
-		log.Fatal(err)
-	}
+	checkError(err)
 
 	return config
 }

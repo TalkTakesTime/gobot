@@ -12,6 +12,9 @@ WARNING
 This bot is still very much in development, and will be in its alpha stages
 for possibly a long time. Don't expect fast progress.
 
+IMPORTANT: login without a password is currently unsupported. It will be fixed
+as soon as possible.
+
 Installation
 ------------
 
@@ -19,11 +22,17 @@ This bot runs on [Go][2], Google's open-source language, and was developed
 for version 1.4.2, although it has not been tested on any other versions.
 
 It requires the following packages to run:
- - `log` (for logging, surprisingly)
- - `golang.org/x/net/websocket` (for websockets)
- - `strconv` (for int -> string conversion)
- - `io/ioutil` (for reading the config file)
- - `gopkg.in/yaml.v2` (for parsing the YAML in the config file)
+  - `encoding/json` -- for logging in
+  - `github.com/tonnerre/golang-pretty` -- for pretty printing
+  - `golang.org/x/net/websocket` -- for websockets
+  - `gopkg.in/yaml.v2` -- for parsing the config
+  - `io/ioutil` -- for reading files and http responses
+  - `log` -- for logging
+  - `net/http` -- for logging in
+  - `net/url` -- for logging in
+  - `regexp` -- for the PS standard toId function
+  - `strings` -- for message parsing
+  - `time` -- for sleeping etc
 
 I will assume that you know how to clone a Git repository or otherwise obtain
 the source code (hint: `go get github.com/TalkTakesTime/gobot` works). To
