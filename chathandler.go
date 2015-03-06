@@ -23,6 +23,11 @@ var (
 	IdRegex  = regexp.MustCompile("[^a-z0-9]+")
 )
 
+// A Message struct is a simpler way of dealing with the message data from
+// the messages PS! sends, as it contains all the information that is needed
+// in a much easier to access form than a raw message from PS!. They can be
+// created by passing a raw message into `NewMessage`, along with the room the
+// message was received in.
 type Message struct {
 	room    string
 	raw     string
@@ -55,6 +60,47 @@ func (bot *Bot) ParseRawMessage(rawMsg string) []Message {
 	}
 
 	return messages
+}
+
+// Parses a non-raw message and determines what action to take in reponse.
+// Currently most messages are ignored.
+func (bot *Bot) ParseMessage(msg Message) {
+	switch msg.msgType {
+	case "challstr":
+		bot.LogIn(msg)
+	case "c", "chat", "pm":
+		if strings.HasPrefix(msg.args[1], bot.config.CommandChar) {
+			bot.RunCommand(msg)
+		}
+	case "updateuser":
+		// TODO: add automatic joining of custom rooms
+	}
+}
+
+// Checks if the given command exists and executes the function it refers
+// to if it does. Otherwise ignores the command.
+func (bot *Bot) RunCommand(msg Message) {
+	cmd := bot.GetCommand(msg.args[1])
+	if cmd != "" && msg.args[0] != bot.config.Nick {
+		if _, ok := bot.commands[cmd]; ok {
+			bot.commands[cmd](msg)
+		}
+	}
+}
+
+// Gets the command name from a message, if there is one. If not,
+// returns the empty string.
+func (bot *Bot) GetCommand(msg string) string {
+	if !strings.HasPrefix(msg, bot.config.CommandChar) {
+		return ""
+	}
+
+	firstSpace := strings.Index(msg, " ")
+	if firstSpace != -1 {
+		return msg[1:firstSpace]
+	} else {
+		return msg[1:]
+	}
 }
 
 // Log in to PS! under the given name and password. See PS! documentation
@@ -131,11 +177,19 @@ func (msg *Message) GetArgs() {
 
 		switch msg.msgType {
 		case "c", "chat": // certain messages can contain | in them
-			msg.args = append(msgData[2:3], strings.Join(msgData[3:], "|"))
+			msg.args = append(msgData[2:3],
+				strings.TrimSpace(strings.Join(msgData[3:], "|")))
 		case "c:":
 			// we discard the timestamp and pretend it's just a |c| message
 			msg.msgType = "c"
-			msg.args = append(msgData[3:4], strings.Join(msgData[4:], "|"))
+			msg.args = append(msgData[3:4],
+				strings.TrimSpace(strings.Join(msgData[4:], "|")))
+		case "pm":
+			// PMs get treated differently so that they can be run through
+			// commands the same way a normal chat message can be
+			msg.room = "user:" + msgData[2]
+			// discard the bot's name
+			msg.args = append(msgData[2:3], msgData[4:]...)
 		default:
 			msg.args = msgData[2:]
 		}

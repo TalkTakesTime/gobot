@@ -27,3 +27,8 @@ server: sim.smogon.com
 # 8000, but some servers don't use that, so ask your server's
 # admin what port they use if in doubt.
 port: "8000"
+#
+# The command character that determines what commands the bot
+# should interpret as being for it. Should be a single
+# non-alphanumeric symbol.
+commandchar: "."

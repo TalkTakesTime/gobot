@@ -13,6 +13,7 @@ import (
 	"github.com/tonnerre/golang-pretty"
 	"golang.org/x/net/websocket"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -29,9 +30,15 @@ type Bot struct {
 
 	// queues to store messages while they wait to be processed or sent.
 	// Created by `CreateBot` with a default capacity of 10, to allow
-	// delayed processing and asynchronicity
+	// delayed processing and asynchronicity.
 	inQueue  chan string
 	outQueue chan string
+
+	// a map of commands, mapping the command name to a handler function. If
+	// a message is received that starts with the command character
+	// immediately followed by a word that matches a command name, it will
+	// execute the handler on the given message.
+	commands map[string]func(Message)
 }
 
 // Simple error handler. Will probably improve it at some point.
@@ -55,12 +62,31 @@ func (bot *Bot) Receive() {
 	}
 }
 
+// Adds a message for the given room to the outgoing queue. If the message
+// is a PM, the room should be of the form "user:name", and the message
+// will automatically get sent as a PM, so there is no need to add "/pm user, "
+// to the front.
+func (bot *Bot) QueueMessage(text, room string) {
+	var msgData string
+	if strings.HasPrefix(room, "user:") {
+		msgData = "|/pm " + room[strings.Index(room, "user:")+5:] +
+			"," + text
+	} else {
+		msgData = room + "|" + text
+	}
+
+	bot.outQueue <- msgData
+}
+
+// Sends a queued message through the websocket connection
 func (bot *Bot) SendMessage(msg string) {
 	log.Printf("\nSent message: %s\n", msg)
 	err := websocket.Message.Send(bot.ws, msg)
 	checkError(err)
 }
 
+// Reads messages from the out queue and sends them to PS, one each 0.5s or so
+// to avoid the chat queue at the PS end filling up and blocking more messages
 func (bot *Bot) Send() {
 	for {
 		select {
@@ -75,8 +101,25 @@ func (bot *Bot) Send() {
 	}
 }
 
-// Starts and runs the bot indefinitely, connecting to PS! and delegating
-// tasks to other functions.
+// Begins the main loop of the bot, which keeps it running indefinitely (or
+// until it crashes, since I haven't given it any form of crash handling yet.)
+func (bot *Bot) MainLoop() {
+	for {
+		select {
+		case rawMsg := <-bot.inQueue:
+			// TODO: add proper message handling
+			messages := bot.ParseRawMessage(rawMsg)
+			for _, msg := range messages {
+				pretty.Log(msg)
+				bot.ParseMessage(msg)
+			}
+		default:
+			// do nothing
+		}
+	}
+}
+
+// Connects to PS! and begins the bot running.
 func (bot *Bot) Start() {
 	log.Printf("\nConnecting to %s\n\n", bot.config.Url)
 
@@ -89,27 +132,18 @@ func (bot *Bot) Start() {
 	go bot.Receive()
 	go bot.Send()
 
-	for {
-		select {
-		case rawMsg := <-bot.inQueue:
-			// TODO: add proper message handling
-			messages := bot.ParseRawMessage(rawMsg)
-			for _, msg := range messages {
-				pretty.Log(msg)
-				if msg.msgType == "challstr" {
-					bot.LogIn(msg)
-				}
-			}
-		default:
-			// do nothing
-		}
-	}
+	bot.MainLoop()
 }
 
+// Creates and returns a bot using the given configuration, loading the
+// commands in commands.go
 func CreateBot(conf Config) Bot {
-	return Bot{
+	bot := Bot{
 		config:   conf,
-		inQueue:  make(chan string, 10),
-		outQueue: make(chan string, 10),
+		inQueue:  make(chan string, 100),
+		outQueue: make(chan string, 100),
+		commands: make(map[string]func(Message)),
 	}
+	bot.LoadCommands()
+	return bot
 }

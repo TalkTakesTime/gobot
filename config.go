@@ -28,6 +28,9 @@ type Config struct {
 	// The websocket URL to connect to. Generate automatically from
 	// the given settings using Config.GenerateUrl
 	Url string
+	// The character that indicates that the message received is for the bot
+	// to respond to. TODO: add validation for command char
+	CommandChar string
 }
 
 // Reads the bot's config from file and converts it to a Config
