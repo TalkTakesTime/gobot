@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -68,12 +69,25 @@ func (bot *Bot) ParseMessage(msg Message) {
 	switch msg.msgType {
 	case "challstr":
 		bot.LogIn(msg)
-	case "c", "chat", "pm":
+	case "c", "c:", "chat", "pm":
 		if strings.HasPrefix(msg.args[1], bot.config.CommandChar) {
+			if msg.msgType == "c:" {
+				// if it's a |c:| it comes with a timestamp, so we can
+				// ignore it if the timestamp was before the bot joined
+				// the room it was in
+				joinTime, _ := strconv.ParseInt(msg.args[2], 10, 64)
+				if joinTime < bot.config.Rooms[msg.room] {
+					break
+				}
+			}
 			bot.RunCommand(msg)
 		}
 	case "updateuser":
-		// TODO: add automatic joining of custom rooms
+		if msg.args[1] == "1" { // the bot is logged in
+			for room := range bot.config.Rooms {
+				bot.JoinRoom(room)
+			}
+		}
 	}
 }
 
@@ -83,6 +97,8 @@ func (bot *Bot) RunCommand(msg Message) {
 	cmd := bot.GetCommand(msg.args[1])
 	if cmd != "" && msg.args[0] != bot.config.Nick {
 		if _, ok := bot.commands[cmd]; ok {
+			msg.args[1] = strings.TrimSpace(strings.TrimPrefix(msg.args[1],
+				bot.config.CommandChar+cmd))
 			bot.commands[cmd](msg)
 		}
 	}
@@ -180,10 +196,10 @@ func (msg *Message) GetArgs() {
 			msg.args = append(msgData[2:3],
 				strings.TrimSpace(strings.Join(msgData[3:], "|")))
 		case "c:":
-			// we discard the timestamp and pretend it's just a |c| message
-			msg.msgType = "c"
+			// move the timestamp to the end
 			msg.args = append(msgData[3:4],
-				strings.TrimSpace(strings.Join(msgData[4:], "|")))
+				strings.TrimSpace(strings.Join(msgData[4:], "|")),
+				msgData[2])
 		case "pm":
 			// PMs get treated differently so that they can be run through
 			// commands the same way a normal chat message can be

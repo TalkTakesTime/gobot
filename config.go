@@ -31,6 +31,9 @@ type Config struct {
 	// The character that indicates that the message received is for the bot
 	// to respond to. TODO: add validation for command char
 	CommandChar string
+	// The rooms the bot is in. Initially loaded from the config file, and
+	// updated whenever the bot joins a room.
+	Rooms map[string]int64
 }
 
 // Reads the bot's config from file and converts it to a Config

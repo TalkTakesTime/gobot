@@ -62,6 +62,14 @@ func (bot *Bot) Receive() {
 	}
 }
 
+// Causes the bot to join the given room and record when it joined in
+// bot.config.Rooms
+func (bot *Bot) JoinRoom(room string) {
+	// track when the bot joined the room
+	bot.config.Rooms[room] = time.Now().Unix()
+	bot.QueueMessage("/join "+room, "")
+}
+
 // Adds a message for the given room to the outgoing queue. If the message
 // is a PM, the room should be of the form "user:name", and the message
 // will automatically get sent as a PM, so there is no need to add "/pm user, "

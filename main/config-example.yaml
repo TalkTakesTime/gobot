@@ -32,3 +32,10 @@ port: "8000"
 # should interpret as being for it. Should be a single
 # non-alphanumeric symbol.
 commandchar: "."
+#
+# The rooms the bot should join upon connecting to PS!. Each
+# room should be represented in the form `name: 1` with their
+# names in the id form (lower-case alphanumeric characters
+# only).
+rooms:
+  techcode: 1
