@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -58,6 +57,12 @@ func (bot *Bot) ParseRawMessage(rawMsg string) []Message {
 		}
 
 		messages = append(messages, NewMessage(room, msg))
+		if strings.HasPrefix(msg, "|init|") {
+			// we don't actually care about the rest of the messages in this
+			// they're all messages from before the joining, so we don't want
+			// to respond to them
+			break
+		}
 	}
 
 	return messages
@@ -71,15 +76,6 @@ func (bot *Bot) ParseMessage(msg Message) {
 		bot.LogIn(msg)
 	case "c", "c:", "chat", "pm":
 		if strings.HasPrefix(msg.args[1], bot.config.CommandChar) {
-			if msg.msgType == "c:" {
-				// if it's a |c:| it comes with a timestamp, so we can
-				// ignore it if the timestamp was before the bot joined
-				// the room it was in
-				joinTime, _ := strconv.ParseInt(msg.args[2], 10, 64)
-				if joinTime < bot.config.Rooms[msg.room] {
-					break
-				}
-			}
 			bot.RunCommand(msg)
 		}
 	case "updateuser":
