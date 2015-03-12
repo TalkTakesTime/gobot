@@ -93,8 +93,13 @@ func (bot *Bot) RunCommand(msg Message) {
 	cmd := bot.GetCommand(msg.args[1])
 	if cmd != "" && msg.args[0] != bot.config.Nick {
 		if _, ok := bot.commands[cmd]; ok {
+			// trim the command name from the args and add it as the third
+			// element in msg.args
 			msg.args[1] = strings.TrimSpace(strings.TrimPrefix(msg.args[1],
 				bot.config.CommandChar+cmd))
+			msg.args = append(msg.args[:2], append([]string{cmd},
+				msg.args[2:]...)...)
+
 			bot.commands[cmd](msg)
 		}
 	}
@@ -182,7 +187,7 @@ func (msg *Message) GetArgs() {
 	if !strings.HasPrefix(msg.raw, "|") || strings.HasPrefix(msg.raw, "||") {
 		// generic typeless message
 		msg.msgType = ""
-		msg.args = []string{msg.raw}
+		msg.args = []string{strings.TrimPrefix(msg.raw, "||")}
 	} else {
 		msgData := strings.Split(msg.raw, "|")
 		msg.msgType = msgData[1] // first should be ""
