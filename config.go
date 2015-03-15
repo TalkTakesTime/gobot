@@ -36,6 +36,7 @@ type Config struct {
 	Rooms      map[string]int64
 	HookPort   int
 	HookSecret string
+	HookRooms  []string
 }
 
 // Reads the bot's config from file and converts it to a Config
