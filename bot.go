@@ -10,6 +10,7 @@
 package gobot
 
 import (
+	"github.com/TalkTakesTime/hookserve/hookserve"
 	"github.com/tonnerre/golang-pretty"
 	"golang.org/x/net/websocket"
 	"log"
@@ -39,6 +40,9 @@ type Bot struct {
 	// immediately followed by a word that matches a command name, it will
 	// execute the handler on the given message.
 	commands map[string]func(Message)
+
+	// the server that listens for github webooks
+	hookServer *hookserve.Server
 }
 
 // Simple error handler. Will probably improve it at some point.
@@ -139,6 +143,7 @@ func (bot *Bot) Start() {
 
 	go bot.Receive()
 	go bot.Send()
+	bot.CreateHook() // creates and starts the server for github webhooks
 
 	bot.MainLoop()
 }

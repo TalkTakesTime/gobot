@@ -33,7 +33,9 @@ type Config struct {
 	CommandChar string
 	// The rooms the bot is in. Initially loaded from the config file, and
 	// updated whenever the bot joins a room.
-	Rooms map[string]int64
+	Rooms      map[string]int64
+	HookPort   int
+	HookSecret string
 }
 
 // Reads the bot's config from file and converts it to a Config
