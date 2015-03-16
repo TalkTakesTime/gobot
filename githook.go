@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -74,8 +75,10 @@ func (bot *Bot) HandlePushHook(event hookserve.Event) {
 
 	// add messages for individual commits too
 	for i := 0; i < event.Size; i++ {
+		msgParts := strings.Split(event.Commits[i].Message, "\n")
+
 		msg = event.Repo + "/" + event.Branch + " " + event.Commits[i].SHA[:7] +
-			" " + event.Commits[i].By + ": " + event.Commits[i].Message
+			" " + event.Commits[i].By + ": " + msgParts[0]
 		for _, r := range bot.config.HookRooms {
 			bot.QueueMessage(msg, r)
 		}
@@ -89,8 +92,10 @@ func (bot *Bot) HandlePullHook(event hookserve.Event) {
 		shortURL = event.URL
 	}
 
+	msgParts := strings.Split(event.Message, "\n")
+
 	msg := "[" + event.BaseRepo + "] **" + event.By +
-		"** opened a new pull request: " + event.Message + " __" +
+		"** opened a new pull request: " + msgParts[0] + " __" +
 		event.BaseBranch + "..." + event.Branch + "__ " + " (" + shortURL + ")"
 	bot.QueueMessage(msg, "techcode")
 }
