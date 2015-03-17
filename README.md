@@ -20,6 +20,8 @@ for version 1.4.2, although it has not been tested on any other versions.
 
 It requires the following packages to run:
   - `encoding/json` -- for logging in
+  - `errors` -- for custom errors
+  - `github.com/TalkTakesTime/hookserve` -- for GitHub webhooks
   - `github.com/tonnerre/golang-pretty` -- for pretty printing
   - `golang.org/x/net/websocket` -- for websockets
   - `gopkg.in/yaml.v2` -- for parsing the config
