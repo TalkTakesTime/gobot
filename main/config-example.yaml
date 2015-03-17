@@ -39,3 +39,19 @@ commandchar: "."
 # only).
 rooms:
   techcode: 1
+#
+# The port that the bot should listen on for GitHub webhook
+# POST requests. Should be a number, not a string. Note that
+# GitHub webhooks should be sent to url:PORT/postreceive,
+# where PORT is the port given here.
+hookport: 8080
+#
+# This is the secret that you give on GitHub when setting up a
+# webhook. Make sure all webhooks to the bot use the same secret
+hooksecret: example
+#
+# The list of rooms that should be updated when a GitHub webhook
+# is received
+hookrooms:
+  - example
+  - anotherroom
