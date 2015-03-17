@@ -4,7 +4,7 @@
  * information can be found in config.go and the bot can be run from
  * main/main.go
  *
- * Copyright 2013 (c) Ben Frengley (TalkTakesTime)
+ * Copyright 2015 (c) Ben Frengley (TalkTakesTime)
  */
 
 package gobot
