@@ -123,15 +123,15 @@ func (bot *Bot) HandlePullHook(event hookserve.Event) {
 	msg := "[" + event.BaseRepo + "] **" + event.By + "** "
 	switch event.Action {
 	case "opened":
-		msg += "opened a new "
+		msg += "opened "
 	case "reopened":
-		msg += "reopened a "
+		msg += "reopened "
 	case "closed":
-		msg += "closed a "
+		msg += "closed "
 	case "synchronize":
-		msg += "synchronized a "
+		msg += "synchronized "
 	}
-	msg += "pull request: " + msgParts[0] + " __" +
+	msg += "pull request #" + event.Number + ": " + msgParts[0] + " __" +
 		event.BaseBranch + "..." + event.Branch + "__ " + " (" + shortURL + ")"
 
 	for _, r := range bot.config.HookRooms {
