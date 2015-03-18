@@ -119,7 +119,6 @@ func (bot *Bot) MainLoop() {
 	for {
 		select {
 		case rawMsg := <-bot.inQueue:
-			// TODO: add proper message handling
 			messages := bot.ParseRawMessage(rawMsg)
 			for _, msg := range messages {
 				pretty.Log(msg)

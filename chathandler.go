@@ -75,6 +75,9 @@ func (bot *Bot) ParseMessage(msg Message) {
 	case "challstr":
 		bot.LogIn(msg)
 	case "c", "c:", "chat", "pm":
+		if toId(msg.args[0]) == toId(bot.config.Nick) {
+			return
+		}
 		if strings.HasPrefix(msg.args[1], bot.config.CommandChar) {
 			bot.RunCommand(msg)
 		}
