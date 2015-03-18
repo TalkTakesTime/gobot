@@ -37,6 +37,7 @@ type Config struct {
 	HookPort   int
 	HookSecret string
 	HookRooms  []string
+	GitAliases map[string]string
 }
 
 // Reads the bot's config from file and converts it to a Config
