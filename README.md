@@ -61,10 +61,10 @@ and if you would like it to log to a file `filename.log` rather than to
 
 To log to a file whose name is the current date, use
 
-    ./main -log=$(date -Iseconds)
+    ./main -log=$(date -Iseconds).log
 
 From there, you're on your own! However, one final warning: the bot will panic
-if the port chosen for config.HookPort is already in use, so choose carefully.
+if the port chosen for `config.HookPort` is already in use, so choose carefully.
 
   [2]: http://golang.org/
 
