@@ -1,10 +1,17 @@
+# Editor files
+.*~
 *~
-GoBot
+
+# Debug directory
 debug/
 debug/*
+
+# User-specific files
+main/*.log
 main/config.yaml
 main/main
 
+# Other repository types
 .hg
 .svn
 .bzr
