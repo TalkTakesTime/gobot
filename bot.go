@@ -142,7 +142,9 @@ func (bot *Bot) Start() {
 
 	go bot.Receive()
 	go bot.Send()
-	bot.CreateHook() // creates and starts the server for github webhooks
+	if bot.config.EnableHooks {
+		bot.CreateHook() // creates and starts the server for github webhooks
+	}
 
 	bot.MainLoop()
 }
@@ -154,6 +156,8 @@ func CreateBot(conf Config) Bot {
 		config:   conf,
 		inQueue:  make(chan string, 100),
 		outQueue: make(chan string, 100),
+		// this currently isn't actually needed I don't think, so I should
+		// probably remove it
 		commands: make(map[string]func(Message)),
 	}
 	bot.LoadCommands()

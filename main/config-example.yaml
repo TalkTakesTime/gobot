@@ -10,6 +10,10 @@
 # empty string -- represented as "" -- and numbers that
 # should be interpreted as strings
 #
+##############################################################
+#                     General Configuration                  #
+##############################################################
+#
 #
 # The nickname to use on PS!. Limited to 16 characters.
 nick: example
@@ -40,6 +44,15 @@ commandchar: "."
 rooms:
   techcode: 1
 #
+##############################################################
+#                    Git Configuration                       #
+##############################################################
+#
+# This determines whether or not the bot will listen for
+# webhooks from GitHub. Set to true to allow this, or
+# false to disable it.
+enablehooks: false
+#
 # The port that the bot should listen on for GitHub webhook
 # POST requests. Should be a number, not a string. Note that
 # GitHub webhooks should be sent to url:PORT/postreceive,
@@ -55,3 +68,10 @@ hooksecret: example
 hookrooms:
   - example
   - anotherroom
+#
+# Aliases for the .git command
+# Should be in the form alias: user/repo
+gitaliases:
+  server: Zarel/Pokemon-Showdown
+  client: Zarel/Pokemon-Showdown-Client
+  bot: TalkTakesTime/gobot

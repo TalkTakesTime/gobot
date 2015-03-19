@@ -75,6 +75,7 @@ func (bot *Bot) ParseMessage(msg Message) {
 	case "challstr":
 		bot.LogIn(msg)
 	case "c", "c:", "chat", "pm":
+		// the bot shouldn't respond to itself
 		if toId(msg.args[0]) == toId(bot.config.Nick) {
 			return
 		}

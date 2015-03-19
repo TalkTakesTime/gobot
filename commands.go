@@ -89,9 +89,10 @@ func (bot *Bot) LoadCommands() {
 		//  - key:value should not have spaces
 		//  - most values are case sensitive
 		"git": func(msg Message) {
-			if toId(msg.args[1]) == "" {
+			if toId(msg.args[1]) == "" || toId(msg.args[1]) == "help" {
 				bot.QueueMessage(bot.config.CommandChar+
-					"git (user/repo|alias) (key:value){0,}", msg.room)
+					"git (user/repo|alias) (key:value){0,}. More detailed"+
+					" help can be found at http://git.io/hRt9", msg.room)
 				return
 			}
 

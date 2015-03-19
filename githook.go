@@ -5,6 +5,9 @@
  * For information on the hookserve module which deals with receiving and
  * parsing the hooks, see https://github.com/TalkTakesTime/hookserve
  *
+ * Note that the bot will panic if the port given in config.yaml is already
+ * in use, so be careful.
+ *
  * Copyright 2015 (c) Ben Frengley (TalkTakesTime)
  */
 

@@ -16,6 +16,7 @@ import (
 )
 
 type Config struct {
+	/**** General config ****/
 	// The nickname to use on PS!. Limited to 16 characters
 	Nick string
 	// The password associated with the given nick. Blank if
@@ -33,10 +34,19 @@ type Config struct {
 	CommandChar string
 	// The rooms the bot is in. Initially loaded from the config file, and
 	// updated whenever the bot joins a room.
-	Rooms      map[string]int64
-	HookPort   int
+	Rooms map[string]int64
+
+	/**** Git config ****/
+	// Whether or not the bot should listen for webhooks
+	EnableHooks bool
+	// The port that the bot should listen on for incoming GitHub webhooks
+	HookPort int
+	// The secret given during the creation of the webhook. Must match the
+	// secret on GitHub
 	HookSecret string
-	HookRooms  []string
+	// A list of rooms to update when a webhook is received
+	HookRooms []string
+	// Aliases for .git, of the form alias: user/repo
 	GitAliases map[string]string
 }
 

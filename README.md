@@ -21,6 +21,7 @@ for version 1.4.2, although it has not been tested on any other versions.
 It requires the following packages to run:
   - `encoding/json` -- for logging in
   - `errors` -- for custom errors
+  - `flag` -- for command line arguments
   - `github.com/TalkTakesTime/hookserve` -- for GitHub webhooks
   - `github.com/tonnerre/golang-pretty` -- for pretty printing
   - `golang.org/x/net/websocket` -- for websockets
@@ -29,7 +30,9 @@ It requires the following packages to run:
   - `log` -- for logging
   - `net/http` -- for logging in
   - `net/url` -- for logging in
+  - `os` -- for dealing with log files
   - `regexp` -- for the PS standard toId function
+  - `strconv` -- for converting between `int` and `string`
   - `strings` -- for message parsing
   - `time` -- for sleeping etc
 
@@ -47,7 +50,21 @@ To build and start the bot, run
     go build
     ./main
 
-From there, you're on your own!
+If you want to give the executable a custom name, use
+
+    go build -o name
+
+and if you would like it to log to a file `filename.log` rather than to
+`stdout`, use
+
+    ./main -log=filename.log
+
+To log to a file whose name is the current date, use
+
+    ./main -log=$(date -Iseconds)
+
+From there, you're on your own! However, one final warning: the bot will panic
+if the port chosen for config.HookPort is already in use, so choose carefully.
 
   [2]: http://golang.org/
 
