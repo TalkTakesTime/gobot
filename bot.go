@@ -24,10 +24,12 @@ const (
 	BufferSize = 4096
 )
 
+var PingTicker *time.Ticker
+
 type Bot struct {
 	// a Config struct representing the settings for the bot to use when it
 	// runs. A config can be loaded from file using `gobot.GetConfig()`.
-	// see config.go and main/main.go for more information
+	// see config.go and main/gobot.go for more information
 	config Config
 
 	// the websocket connection for the bot to use to communicate with the
@@ -36,7 +38,7 @@ type Bot struct {
 	ws *websocket.Conn
 
 	// queues to store messages while they wait to be processed or sent.
-	// Created by `CreateBot` with a default capacity of 10, to allow
+	// Created by `CreateBot` with a default capacity of 100, to allow
 	// delayed processing and asynchronicity.
 	inQueue  chan string
 	outQueue chan string
@@ -114,6 +116,12 @@ func (bot *Bot) Send() {
 		case msg := <-bot.outQueue:
 			bot.SendMessage(msg)
 			time.Sleep(500 * time.Millisecond)
+		case <-PingTicker.C:
+			err := bot.ws.WriteControl(websocket.PingMessage, []byte("ping"),
+				time.Now().Add(10*time.Second))
+			if err != nil {
+				pretty.Log(err)
+			}
 		default:
 			// do nothing
 			// is this necessary?
@@ -155,8 +163,15 @@ func (bot *Bot) Start() {
 		log.Fatal()
 	}
 
+	PingTicker = time.NewTicker(time.Minute)
+	bot.ws.SetPongHandler(func(s string) error {
+		pretty.Log("received pong:", s)
+		return nil
+	})
+
 	defer res.Body.Close()
 	defer bot.ws.Close()
+	defer PingTicker.Stop()
 
 	go bot.Receive()
 	go bot.Send()
