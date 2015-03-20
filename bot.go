@@ -11,11 +11,17 @@ package gobot
 
 import (
 	"github.com/TalkTakesTime/hookserve/hookserve"
+	"github.com/gorilla/websocket"
 	"github.com/tonnerre/golang-pretty"
-	"golang.org/x/net/websocket"
 	"log"
+	"net"
+	"net/http"
 	"strings"
 	"time"
+)
+
+const (
+	BufferSize = 4096
 )
 
 type Bot struct {
@@ -55,14 +61,17 @@ func checkError(err error) {
 // Receives messages from PS and queues them up to be handled. Use as a
 // goroutine or otherwise it will loop infinitely.
 func (bot *Bot) Receive() {
-	var msg string
 	for {
-		msg = ""
-		err := websocket.Message.Receive(bot.ws, &msg)
+		msgType, msg, err := bot.ws.ReadMessage()
 		checkError(err)
 
+		if msgType != websocket.TextMessage {
+			log.Println("unexpected message type:", msg)
+			return
+		}
+
 		// log.Printf("\nReceived: %s.\n", msg)
-		bot.inQueue <- msg
+		bot.inQueue <- string(msg)
 	}
 }
 
@@ -93,7 +102,7 @@ func (bot *Bot) QueueMessage(text, room string) {
 // Sends a queued message through the websocket connection
 func (bot *Bot) SendMessage(msg string) {
 	log.Printf("\nSent message: %s\n", msg)
-	err := websocket.Message.Send(bot.ws, msg)
+	err := bot.ws.WriteMessage(websocket.TextMessage, []byte(msg))
 	checkError(err)
 }
 
@@ -132,12 +141,21 @@ func (bot *Bot) MainLoop() {
 
 // Connects to PS! and begins the bot running.
 func (bot *Bot) Start() {
-	log.Printf("\nConnecting to %s\n\n", bot.config.Url)
-
-	var err error
-	bot.ws, err = websocket.Dial(bot.config.Url, "",
-		"https://play.pokemonshowdown.com")
+	conn, err := net.Dial("tcp", bot.config.Server+":"+bot.config.Port)
 	checkError(err)
+
+	log.Printf("\nConnecting to %s\n\n", bot.config.URL.String())
+
+	var res *http.Response
+	bot.ws, res, err = websocket.NewClient(conn, bot.config.URL, http.Header{
+		"Origin": []string{"https://play.pokemonshowdown.com"},
+	}, BufferSize, BufferSize)
+	if err != nil {
+		pretty.Logf("%s: %#v\n", err.Error(), res)
+		log.Fatal()
+	}
+
+	defer res.Body.Close()
 	defer bot.ws.Close()
 
 	go bot.Receive()

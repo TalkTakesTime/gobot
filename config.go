@@ -13,6 +13,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"net/url"
 )
 
 type Config struct {
@@ -27,8 +28,8 @@ type Config struct {
 	// The port the given server uses. Default should be 8000
 	Port string
 	// The websocket URL to connect to. Generate automatically from
-	// the given settings using Config.GenerateUrl
-	Url string
+	// the given settings using Config.GenerateURL
+	URL *url.URL
 	// The character that indicates that the message received is for the bot
 	// to respond to. TODO: add validation for command char
 	CommandChar string
@@ -79,7 +80,9 @@ func GetConfig() Config {
 // parameters.
 // The websocket URL has the following format:
 //   ws://server:port/showdown/websocket
-func (conf *Config) GenerateUrl() {
-	conf.Url = "ws://" + conf.Server + ":" + conf.Port +
-		"/showdown/websocket"
+func (conf *Config) GenerateURL() {
+	var err error
+	conf.URL, err = url.Parse("ws://" + conf.Server + ":" + conf.Port +
+		"/showdown/websocket")
+	checkError(err)
 }
