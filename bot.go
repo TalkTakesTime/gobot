@@ -11,17 +11,25 @@ package gobot
 
 import (
 	"github.com/TalkTakesTime/hookserve/hookserve"
+	"github.com/gorilla/websocket"
 	"github.com/tonnerre/golang-pretty"
-	"golang.org/x/net/websocket"
 	"log"
+	"net"
+	"net/http"
 	"strings"
 	"time"
 )
 
+const (
+	BufferSize = 4096
+)
+
+var PingTicker *time.Ticker
+
 type Bot struct {
 	// a Config struct representing the settings for the bot to use when it
 	// runs. A config can be loaded from file using `gobot.GetConfig()`.
-	// see config.go and main/main.go for more information
+	// see config.go and main/gobot.go for more information
 	config Config
 
 	// the websocket connection for the bot to use to communicate with the
@@ -30,7 +38,7 @@ type Bot struct {
 	ws *websocket.Conn
 
 	// queues to store messages while they wait to be processed or sent.
-	// Created by `CreateBot` with a default capacity of 10, to allow
+	// Created by `CreateBot` with a default capacity of 100, to allow
 	// delayed processing and asynchronicity.
 	inQueue  chan string
 	outQueue chan string
@@ -55,14 +63,17 @@ func checkError(err error) {
 // Receives messages from PS and queues them up to be handled. Use as a
 // goroutine or otherwise it will loop infinitely.
 func (bot *Bot) Receive() {
-	var msg string
 	for {
-		msg = ""
-		err := websocket.Message.Receive(bot.ws, &msg)
+		msgType, msg, err := bot.ws.ReadMessage()
 		checkError(err)
 
+		if msgType != websocket.TextMessage {
+			log.Println("unexpected message type:", msg)
+			return
+		}
+
 		// log.Printf("\nReceived: %s.\n", msg)
-		bot.inQueue <- msg
+		bot.inQueue <- string(msg)
 	}
 }
 
@@ -93,7 +104,7 @@ func (bot *Bot) QueueMessage(text, room string) {
 // Sends a queued message through the websocket connection
 func (bot *Bot) SendMessage(msg string) {
 	log.Printf("\nSent message: %s\n", msg)
-	err := websocket.Message.Send(bot.ws, msg)
+	err := bot.ws.WriteMessage(websocket.TextMessage, []byte(msg))
 	checkError(err)
 }
 
@@ -105,6 +116,12 @@ func (bot *Bot) Send() {
 		case msg := <-bot.outQueue:
 			bot.SendMessage(msg)
 			time.Sleep(500 * time.Millisecond)
+		case <-PingTicker.C:
+			err := bot.ws.WriteControl(websocket.PingMessage, []byte("ping"),
+				time.Now().Add(10*time.Second))
+			if err != nil {
+				pretty.Log(err)
+			}
 		default:
 			// do nothing
 			// is this necessary?
@@ -132,13 +149,29 @@ func (bot *Bot) MainLoop() {
 
 // Connects to PS! and begins the bot running.
 func (bot *Bot) Start() {
-	log.Printf("\nConnecting to %s\n\n", bot.config.Url)
-
-	var err error
-	bot.ws, err = websocket.Dial(bot.config.Url, "",
-		"https://play.pokemonshowdown.com")
+	conn, err := net.Dial("tcp", bot.config.Server+":"+bot.config.Port)
 	checkError(err)
+
+	log.Printf("\nConnecting to %s\n\n", bot.config.URL.String())
+
+	var res *http.Response
+	bot.ws, res, err = websocket.NewClient(conn, bot.config.URL, http.Header{
+		"Origin": []string{"https://play.pokemonshowdown.com"},
+	}, BufferSize, BufferSize)
+	if err != nil {
+		pretty.Logf("%s: %#v\n", err.Error(), res)
+		log.Fatal()
+	}
+
+	PingTicker = time.NewTicker(time.Minute)
+	bot.ws.SetPongHandler(func(s string) error {
+		pretty.Log("received pong:", s)
+		return nil
+	})
+
+	defer res.Body.Close()
 	defer bot.ws.Close()
+	defer PingTicker.Stop()
 
 	go bot.Receive()
 	go bot.Send()
