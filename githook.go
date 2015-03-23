@@ -145,7 +145,7 @@ func (bot *Bot) HandlePullHook(event hookserve.Event) {
 
 	msg := fmt.Sprintf(PullReqTemplate, FormatRepo(event.BaseRepo),
 		FormatName(event.By), event.Action, event.Number, msgParts[0],
-		FormatBranch(event.BaseBranch), FormatBranch(event.BaseBranch),
+		FormatBranch(event.BaseBranch), FormatBranch(event.Branch),
 		FormatURL(shortURL))
 
 	for _, r := range bot.config.HookRooms {
