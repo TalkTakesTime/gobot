@@ -31,7 +31,7 @@ func main() {
 	}
 
 	config := gobot.GetConfig()
-	config.GenerateUrl()
+	config.GenerateURL()
 
 	psBot := gobot.CreateBot(config)
 	psBot.Start()

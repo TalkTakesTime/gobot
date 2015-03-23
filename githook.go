@@ -15,12 +15,12 @@ package gobot
 
 import (
 	"errors"
+	"fmt"
 	"github.com/TalkTakesTime/hookserve/hookserve" // credits to phayes for the original
 	"github.com/tonnerre/golang-pretty"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -28,6 +28,16 @@ import (
 const (
 	GitIOBase   = "http://git.io/"
 	GitIOCreate = "http://git.io/create"
+
+	// template for push messages
+	// [repo] user pushed number new commits? to branch: URL
+	PushTemplate = "!htmlbox [%s] %s pushed %d new commit%s to %s: %s"
+	// template for commit messages
+	// repo/branch SHA user: commit message
+	CommitTemplate = "!htmlbox %s/%s %s %s: %s"
+	// template for pull request messages
+	// [repo] user action pull request #number: message (upstream...base) URL
+	PullReqTemplate = "!htmlbox [%s] %s %s pull request #%d: %s (%s...%s) %s"
 )
 
 var (
@@ -92,9 +102,14 @@ func (bot *Bot) HandlePushHook(event hookserve.Event) {
 		shortURL = event.URL
 	}
 
-	msg := "[" + event.Repo + "] **" + event.By + "** pushed " +
-		strconv.Itoa(event.Size) + " commit(s) to " + event.Branch + " (" +
-		shortURL + ")"
+	plural := ""
+	if event.Size > 1 {
+		plural = "s"
+	}
+
+	msg := fmt.Sprintf(PushTemplate, FormatRepo(event.Repo), FormatName(event.By),
+		FormatSize(event.Size), plural, FormatBranch(event.Branch),
+		FormatURL(shortURL))
 	// send to all githook rooms
 	for _, r := range bot.config.HookRooms {
 		bot.QueueMessage(msg, r)
@@ -104,8 +119,9 @@ func (bot *Bot) HandlePushHook(event hookserve.Event) {
 	for i := 0; i < event.Size; i++ {
 		msgParts := strings.Split(event.Commits[i].Message, "\n")
 
-		msg = event.Repo + "/" + event.Branch + " | " + event.Commits[i].SHA[:7] +
-			" | **" + event.Commits[i].By + "**: " + msgParts[0]
+		msg = fmt.Sprintf(CommitTemplate, FormatRepo(event.Repo),
+			FormatBranch(event.Branch), FormatSHA(event.Commits[i].SHA[:7]),
+			FormatName(event.Commits[i].By), msgParts[0])
 		for _, r := range bot.config.HookRooms {
 			bot.QueueMessage(msg, r)
 		}
@@ -123,23 +139,49 @@ func (bot *Bot) HandlePullHook(event hookserve.Event) {
 
 	msgParts := strings.Split(event.Message, "\n")
 
-	msg := "[" + event.BaseRepo + "] **" + event.By + "** "
-	switch event.Action {
-	case "opened":
-		msg += "opened "
-	case "reopened":
-		msg += "reopened "
-	case "closed":
-		msg += "closed "
-	case "synchronize":
-		msg += "synchronized "
+	if event.Action == "synchronize" {
+		event.Action = "synchronized"
 	}
-	msg += "pull request #" + event.Number + ": " + msgParts[0] + " __" +
-		event.BaseBranch + "..." + event.Branch + "__ " + " (" + shortURL + ")"
+
+	msg := fmt.Sprintf(PullReqTemplate, FormatRepo(event.BaseRepo),
+		FormatName(event.By), event.Action, event.Number, msgParts[0],
+		FormatBranch(event.BaseBranch), FormatBranch(event.BaseBranch),
+		FormatURL(shortURL))
 
 	for _, r := range bot.config.HookRooms {
 		bot.QueueMessage(msg, r)
 	}
+}
+
+// FormatRepo formats a repo name for !htmlbox using #FF00FF.
+func FormatRepo(repo string) string {
+	return fmt.Sprintf("<font color=\"#FF00FF\">%s</font>", repo)
+}
+
+// FormatBranch formats a branch for !htmlbox using #9C009C.
+func FormatBranch(branch string) string {
+	return fmt.Sprintf("<font color=\"#9C009C\">%s</font>", branch)
+}
+
+// FormatName formats a name for !htmlbox using #7F7F7F. Note that it uses a
+// different colour to the IRC version due to PS' background colour.
+func FormatName(name string) string {
+	return fmt.Sprintf("<font color=\"#6F6F6F\">%s</font>", name)
+}
+
+// FormatURL formats a URL for !htmlbox.
+func FormatURL(url string) string {
+	return fmt.Sprintf("<a href=\"%s\">%s</a>", url, url)
+}
+
+// FormatSHA formats a commit SHA for !htmlbox using #7F7F7F.
+func FormatSHA(sha string) string {
+	return fmt.Sprintf("<font color=\"#7F7F7F\">%s</font>", sha)
+}
+
+// FormatSize formats an event size for !htmlbox using <strong>.
+func FormatSize(size int) string {
+	return fmt.Sprintf("<strong>%d</strong>", size)
 }
 
 // Utility to shorten a URL using http://git.io/
