@@ -31,13 +31,13 @@ const (
 
 	// template for push messages
 	// [repo] user pushed number new commits? to branch: URL
-	PushTemplate = "!htmlbox [%s] %s pushed %d new commit%s to %s: %s"
+	PushTemplate = "!htmlbox [%s] %s pushed %s new commit%s to %s: %s"
 	// template for commit messages
 	// repo/branch SHA user: commit message
 	CommitTemplate = "!htmlbox %s/%s %s %s: %s"
 	// template for pull request messages
 	// [repo] user action pull request #number: message (upstream...base) URL
-	PullReqTemplate = "!htmlbox [%s] %s %s pull request #%d: %s (%s...%s) %s"
+	PullReqTemplate = "!htmlbox [%s] %s %s pull request #%s: %s (%s...%s) %s"
 )
 
 var (
