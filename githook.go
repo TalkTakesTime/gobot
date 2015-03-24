@@ -110,10 +110,6 @@ func (bot *Bot) HandlePushHook(event hookserve.Event) {
 	msg := fmt.Sprintf(PushTemplate, FormatRepo(event.Repo),
 		FormatName(event.By), FormatSize(event.Size), plural,
 		FormatBranch(event.Branch), FormatURL(shortURL))
-	// send to all githook rooms
-	// for _, r := range bot.config.HookRooms {
-	// 	bot.QueueMessage(msg, r)
-	// }
 
 	// add messages for individual commits too
 	for i := 0; i < event.Size; i++ {
