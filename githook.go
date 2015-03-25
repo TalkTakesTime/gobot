@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"github.com/TalkTakesTime/hookserve/hookserve" // credits to phayes for the original
 	"github.com/tonnerre/golang-pretty"
+	"html"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -157,28 +158,28 @@ func (bot *Bot) HandlePullHook(event hookserve.Event) {
 
 // FormatRepo formats a repo name for !htmlbox using #FF00FF.
 func FormatRepo(repo string) string {
-	return fmt.Sprintf("<font color=\"#FF00FF\">%s</font>", repo)
+	return fmt.Sprintf("<font color=\"#FF00FF\">%s</font>", html.EscapeString(repo))
 }
 
 // FormatBranch formats a branch for !htmlbox using #9C009C.
 func FormatBranch(branch string) string {
-	return fmt.Sprintf("<font color=\"#9C009C\">%s</font>", branch)
+	return fmt.Sprintf("<font color=\"#9C009C\">%s</font>", html.EscapeString(branch))
 }
 
 // FormatName formats a name for !htmlbox using #7F7F7F. Note that it uses a
 // different colour to the IRC version due to PS' background colour.
 func FormatName(name string) string {
-	return fmt.Sprintf("<font color=\"#6F6F6F\">%s</font>", name)
+	return fmt.Sprintf("<font color=\"#6F6F6F\">%s</font>", html.EscapeString(name))
 }
 
 // FormatURL formats a URL for !htmlbox.
 func FormatURL(url string) string {
-	return fmt.Sprintf("<a href=\"%s\">%s</a>", url, url)
+	return fmt.Sprintf("<a href=\"%s\">%s</a>", html.EscapeString(url), html.EscapeString(url))
 }
 
 // FormatSHA formats a commit SHA for !htmlbox using #7F7F7F.
 func FormatSHA(sha string) string {
-	return fmt.Sprintf("<font color=\"#7F7F7F\">%s</font>", sha)
+	return fmt.Sprintf("<font color=\"#7F7F7F\">%s</font>", html.EscapeString(sha))
 }
 
 // FormatSize formats an event size for !htmlbox using <strong>.
