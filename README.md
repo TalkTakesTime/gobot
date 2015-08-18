@@ -1,3 +1,5 @@
+## THIS PROJECT IS NO LONGER MAINTAINED AS OF 18/8/2015. FORK AT YOUR OWN RISK.
+
 Pokémon Showdown! GoBot
 =======================
 
@@ -5,12 +7,6 @@ Another [Pokémon Showdown!][1] bot, this time in Go. Written by TalkTakesTime
 as a learning exercise.
 
   [1]: https://play.pokemonshowdown.com/
-
-WARNING
--------
-
-This bot is still very much in development, and will be in its alpha stages
-for possibly a long time. Don't expect fast progress.
 
 Installation
 ------------
