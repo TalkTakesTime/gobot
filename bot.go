@@ -122,10 +122,6 @@ func (bot *Bot) Send() {
 			if err != nil {
 				pretty.Log(err)
 			}
-		default:
-			// do nothing
-			// is this necessary?
-			// allows non-blocking reading from channels so I'll keep it
 		}
 	}
 }
@@ -141,8 +137,6 @@ func (bot *Bot) MainLoop() {
 				pretty.Log(msg)
 				bot.ParseMessage(msg)
 			}
-		default:
-			// do nothing
 		}
 	}
 }
